@@ -1,0 +1,29 @@
+{
+  "name": "legalease-ai",
+  "version": "1.0.0",
+  "description": "GenAI-powered legal document understanding, grounded Q&A, and comparison application",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "typecheck:backend": "npm --prefix backend run typecheck",
+    "typecheck:frontend": "npm --prefix frontend run typecheck",
+    "typecheck": "npm run typecheck:backend && npm run typecheck:frontend",
+    "firebase": "firebase",
+    "verify": "node scripts/verify.js && npm run typecheck && npm run build",
+    "diagnose:gemini": "node scripts/diagnose-gemini.js",
+    "scan-secrets": "node -e \"const fs=require('fs'); const content=fs.readFileSync('.gitignore','utf8'); if(!content.includes('.env')) { console.error('SECURITY FAILURE: .env missing from .gitignore!'); process.exit(1); } console.log('✅ Secret baseline scan passed: .env correctly ignored.');\""
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.35.1",
+    "typescript": "^5.6.2"
+  }
+}
