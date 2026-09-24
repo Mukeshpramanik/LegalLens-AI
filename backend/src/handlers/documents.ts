@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { DocumentService } from '../services/documentService';
 import { FirestoreService } from '../services/firestoreService';
+import { StorageService } from '../services/storageService';
 import { AppError } from '../utils/errorHandler';
 import { SUPPORTED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '../../../shared/constants';
 import { AuthenticatedRequest } from '../middleware/auth';
@@ -90,6 +91,44 @@ export async function handleGetDocumentById(req: Request, res: Response, next: N
     res.json({
       success: true,
       data: doc,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function handleDeleteDocument(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.uid) {
+      throw new AppError('Unauthorized', 401, 'UNAUTHORIZED');
+    }
+
+    const { id } = req.params;
+    const parsedId = uuidSchema.safeParse(id);
+    if (!parsedId.success) {
+      throw new AppError(parsedId.error.errors[0].message, 400, 'INVALID_PARAM');
+    }
+
+    const userId = authReq.user.uid;
+
+    // 1. Verify existence and ownership
+    const doc = await FirestoreService.getDocumentById(userId, id);
+    if (!doc) {
+      // getDocumentById internally ensures it only returns the doc if it belongs to userId.
+      // If the doc doesn't exist OR belongs to someone else, it returns null.
+      throw new AppError('Document not found', 404, 'NOT_FOUND');
+    }
+
+    // 2. Delete from Storage
+    await StorageService.deleteDocumentFiles(userId, id);
+
+    // 3. Delete from Firestore (metadata, analysis, QA, comparisons)
+    await FirestoreService.deleteDocument(id, userId);
+
+    res.json({
+      success: true,
+      data: { message: 'Document deleted successfully' }
     });
   } catch (error) {
     next(error);

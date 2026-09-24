@@ -120,7 +120,7 @@ export default function DocumentAnalysisPage() {
         <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3 max-w-2xl">
           <AlertCircle className="w-6 h-6 flex-shrink-0" />
           <div>
-            <h3 className="font-semibold text-lg mb-1">Error Loading Document</h3>
+            <h3 className="font-semibold text-lg mb-1">{error?.includes('found') ? 'Document Not Found' : 'Error Loading Document'}</h3>
             <p className="text-sm">{error || 'Document not found'}</p>
             <button onClick={() => router.push('/dashboard')} className="mt-4 px-4 py-2 bg-white text-slate-700 rounded-lg shadow-sm font-medium border border-slate-200 hover:bg-slate-50 transition-colors">
               Back to Dashboard

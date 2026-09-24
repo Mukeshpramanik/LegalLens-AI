@@ -147,4 +147,48 @@ export class FirestoreService {
       throw new Error('Database service failure while fetching comparison result');
     }
   }
+
+  static async deleteDocument(docId: string, userId: string): Promise<void> {
+    try {
+      const batch = admin.firestore().batch();
+      
+      // 1. Delete QA subcollection
+      const qaSnapshot = await this.collection.doc(docId).collection('qa').get();
+      qaSnapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      
+      // 2. Delete Analysis subcollection document
+      batch.delete(this.collection.doc(docId).collection('analysis').doc('latest'));
+      
+      // 3. Delete Document itself
+      batch.delete(this.collection.doc(docId));
+      
+      await batch.commit();
+
+      // 4. Delete associated comparisons
+      const comparisonsA = await this.comparisonsCollection
+        .where('userId', '==', userId)
+        .where('documentIdA', '==', docId)
+        .get();
+        
+      const comparisonsB = await this.comparisonsCollection
+        .where('userId', '==', userId)
+        .where('documentIdB', '==', docId)
+        .get();
+        
+      const compBatch = admin.firestore().batch();
+      comparisonsA.docs.forEach(doc => compBatch.delete(doc.ref));
+      comparisonsB.docs.forEach(doc => compBatch.delete(doc.ref));
+      
+      if (comparisonsA.docs.length > 0 || comparisonsB.docs.length > 0) {
+        await compBatch.commit();
+      }
+      
+      Logger.info('Successfully deleted document from Firestore', { userId, documentId: docId });
+    } catch (error) {
+      Logger.error('Failed to delete document from Firestore', { userId, documentId: docId, error: (error as Error).message });
+      throw new Error('Database service failure during document deletion');
+    }
+  }
 }

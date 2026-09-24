@@ -4,13 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { checkBackendHealth, apiClient } from '../../services/api';
 import DocumentUpload from '../../components/Documents/DocumentUpload';
 import { LegalDocument, ComparisonResult } from '../../../../shared/types';
-import { FileText, Clock, CheckCircle, ShieldAlert, Loader2, ArrowRight, Scale } from 'lucide-react';
+import { FileText, Clock, CheckCircle, ShieldAlert, Loader2, ArrowRight, Scale, Trash2, AlertCircle } from 'lucide-react';
 
 export default function DashboardPage() {
   const [backendStatus, setBackendStatus] = useState<string>('checking...');
   const [isError, setIsError] = useState(false);
   const [documents, setDocuments] = useState<LegalDocument[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(true);
+  const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Comparison State
   const [isCompareMode, setIsCompareMode] = useState(false);
@@ -49,6 +52,27 @@ export default function DashboardPage() {
   };
 
   const completedDocs = documents.filter(d => d.status === 'complete');
+
+  
+  const handleDelete = async (id: string) => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await apiClient(`/api/documents/${id}`, { method: 'DELETE' });
+      setDocuments(docs => docs.filter(d => d.id !== id));
+      setDocToDelete(null);
+      // Clean up compare state if deleted doc was selected
+      if (docAId === id) setDocAId('');
+      if (docBId === id) setDocBId('');
+      if (comparisonResult && (comparisonResult.doc1Id === id || comparisonResult.doc2Id === id)) {
+         setComparisonResult(null);
+      }
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete document');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleCompare = async () => {
     if (!docAId || !docBId) {
@@ -250,7 +274,15 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 </div>
-                <div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setDocToDelete(doc.id)}
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                    title="Delete Document"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                   <button
                     onClick={() => window.location.href = `/dashboard/document/${doc.id}`}
                     className="px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap"
@@ -258,11 +290,48 @@ export default function DashboardPage() {
                     View Analysis
                   </button>
                 </div>
+
               </li>
             ))}
           </ul>
         )}
       </div>
+    
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
+            <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              Delete Document
+            </h3>
+            <p className="text-slate-600 text-sm mb-6">
+              Are you sure you want to delete this document? This action cannot be undone. All associated AI analysis, Q&A history, and comparison data will also be permanently removed.
+            </p>
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">
+                {deleteError}
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => { setDocToDelete(null); setDeleteError(null); }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(docToDelete)}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white font-medium hover:bg-red-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

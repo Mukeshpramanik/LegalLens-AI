@@ -32,12 +32,13 @@ app.use('/api/', apiLimiter);
 // Document Routes
 import { uploadLimiter, analysisLimiter, qaLimiter, compareLimiter } from './middleware/rateLimit';
 import { requireAuth } from './middleware/auth';
-import { uploadMiddleware, handleUpload, handleGetDocuments, handleGetDocumentById } from './handlers/documents';
+import { uploadMiddleware, handleUpload, handleGetDocuments, handleGetDocumentById, handleDeleteDocument } from './handlers/documents';
 import { handleAnalyzeDocument, handleGetAnalysis, handleAskQuestion, handleGetQAPairs, handleCompareDocuments } from './handlers/analysis';
 
 app.post('/api/documents/upload', requireAuth, uploadLimiter, uploadMiddleware.single('file'), handleUpload);
 app.get('/api/documents', requireAuth, handleGetDocuments);
 app.get('/api/documents/:id', requireAuth, handleGetDocumentById);
+app.delete('/api/documents/:id', requireAuth, handleDeleteDocument);
 app.post('/api/documents/:id/analyze', requireAuth, analysisLimiter, handleAnalyzeDocument);
 app.get('/api/documents/:id/analyze', requireAuth, handleGetAnalysis);
 app.post('/api/documents/compare', requireAuth, compareLimiter, handleCompareDocuments);

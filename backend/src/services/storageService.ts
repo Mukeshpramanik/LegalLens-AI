@@ -101,4 +101,25 @@ export class StorageService {
       throw new Error('Storage service failure during text retrieval');
     }
   }
+
+  /**
+   * Deletes a document directory and all its contents.
+   */
+  static async deleteDocumentFiles(userId: string, docId: string): Promise<void> {
+    const relativePath = path.join('users', userId, 'documents', docId);
+    const absolutePath = path.join(storageRoot, relativePath);
+
+    try {
+      await fs.rm(absolutePath, { recursive: true, force: true });
+      Logger.info('Successfully deleted document files locally', { userId, documentId: docId });
+    } catch (error) {
+      Logger.error('Failed to delete document files locally', {
+        userId,
+        documentId: docId,
+        error: (error as Error).message,
+      });
+      // We don't throw an error here to prevent a failed storage cleanup from blocking Firestore cleanup
+      // if the folder is already missing or locked.
+    }
+  }
 }
