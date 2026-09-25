@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Logo } from "../components/Logo";
 
-import { LEGAL_DISCLAIMER } from '../../../shared/constants';
+import { LEGAL_DISCLAIMER } from '../shared/constants';
 
 export const metadata: Metadata = {
   title: 'LegalLens AI — Grounded GenAI Legal Assistance',
