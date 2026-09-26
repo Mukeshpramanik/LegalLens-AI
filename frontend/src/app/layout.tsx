@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Logo } from "../components/Logo";
-
 import { LEGAL_DISCLAIMER } from '../shared/constants';
 
 export const metadata: Metadata = {
@@ -17,21 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
 
-        <header className="bg-slate-900 border-b border-slate-800 py-3 px-6 sticky top-0 z-50 shadow-sm">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Logo />
-            <nav aria-label="Main Navigation" className="flex items-center gap-6">
-              <a href="/dashboard" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-                Dashboard
-              </a>
-              <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs font-bold">
-                U
-              </div>
-            </nav>
-          </div>
-        </header>
-
-        <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto p-6">
+        {/* Global Header has been moved to dashboard/layout.tsx so it doesn't show on the login page */}
+        
+        <main id="main-content" className="flex-1 w-full mx-auto">
           {children}
         </main>
 
