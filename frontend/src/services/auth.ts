@@ -1,22 +1,38 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, User } from 'firebase/auth';
 
+if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  console.error("Missing NEXT_PUBLIC_FIREBASE_API_KEY. Check your .env configuration.");
+}
+
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'demo-api-key',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'demo.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-project',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 };
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+// Only initialize if we have the minimum required config
+let app;
+if (typeof window !== "undefined" && !firebaseConfig.apiKey) {
+  throw new Error("Firebase configuration is missing. Please configure NEXT_PUBLIC_FIREBASE_API_KEY in your environment.");
+} else {
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+}
+
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// Force the account selection prompt every time
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 export async function signInWithGoogle(): Promise<User> {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
+  } catch (error: any) {
+    console.error('[Firebase Auth Error] Code:', error.code, 'Message:', error.message);
     throw error;
   }
 }

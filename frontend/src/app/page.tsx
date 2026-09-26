@@ -1,29 +1,55 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithGoogle } from '../services/auth';
-import { ShieldCheck, FileSearch, Scale, ArrowRight, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { signInWithGoogle, auth } from '../services/auth';
+import { ShieldCheck, FileSearch, Scale, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.replace('/dashboard');
+      } else {
+        setIsAuthChecking(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSignIn = async () => {
     setIsLoading(true);
     setError(null);
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
-    } catch (err) {
-      setError('Failed to sign in with Google. Please try again.');
-      console.error(err);
-    } finally {
+      // Wait for onAuthStateChanged to redirect
+    } catch (err: any) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized for OAuth. Check Firebase Console.');
+      } else {
+        setError('Failed to sign in with Google. Please try again.');
+      }
       setIsLoading(false);
     }
   };
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -101,23 +127,6 @@ export default function LandingPage() {
                 </svg>
               )}
               <span>{isLoading ? 'Connecting...' : 'Continue with Google'}</span>
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">Hackathon Reviewers</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-full py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-            >
-              Explore Dashboard Shell
-              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
           <p className="text-center text-xs text-slate-500">
