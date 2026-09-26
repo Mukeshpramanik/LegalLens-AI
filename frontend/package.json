@@ -12,7 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.10.0",
+    "@opennextjs/cloudflare": "1.10.0",
     "dotenv": "^16.6.1",
     "firebase": "^10.13.1",
     "lucide-react": "^0.441.0",
