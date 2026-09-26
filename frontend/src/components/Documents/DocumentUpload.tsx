@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, File, AlertCircle, CheckCircle2, Loader2, X } from 'lucide-react';
 import { apiClient } from '../../services/api';
-import { LegalDocument } from '../../../../shared/types';
+import { LegalDocument } from '../../shared/types';
 import { MAX_FILE_SIZE_BYTES, SUPPORTED_FILE_EXTENSIONS } from '../../shared/constants';
 
 interface DocumentUploadProps {

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '../../../../services/api';
-import { AnalysisResult, LegalDocument, QAPair } from '../../../../../../shared/types';
+import { AnalysisResult, LegalDocument, QAPair } from '../../../../shared/types';
 import {
   ArrowLeft, Loader2, AlertCircle, FileText, CheckCircle,
   ShieldAlert, FileSearch, Send, MessageSquare, Briefcase,

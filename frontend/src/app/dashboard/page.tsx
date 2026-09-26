@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { checkBackendHealth, apiClient } from '../../services/api';
 import DocumentUpload from '../../components/Documents/DocumentUpload';
-import { LegalDocument, ComparisonResult } from '../../../../shared/types';
+import { LegalDocument, ComparisonResult } from '../../shared/types';
 import { FileText, Clock, CheckCircle, ShieldAlert, Loader2, ArrowRight, Scale, Trash2, AlertCircle } from 'lucide-react';
 
 export default function DashboardPage() {
