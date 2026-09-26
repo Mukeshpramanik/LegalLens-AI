@@ -3,10 +3,28 @@ import { env } from '../config/env';
 import { Logger } from '../utils/logging';
 import { AnalysisResult, QAPair, ComparisonResult } from '../../../shared/types';
 
+// Structural type definitions for @google/genai to avoid TS1479
+// (Node16 CommonJS modules cannot directly import types from ESM-only packages)
+interface GenAIModelClient {
+  generateContent(params: {
+    model: string;
+    contents: Array<{ role: string; parts: Array<{ text: string }> }>;
+    config?: {
+      temperature?: number;
+      topP?: number;
+      topK?: number;
+      responseMimeType?: string;
+    };
+  }): Promise<{ text?: string }>;
+}
+
+interface GenAIClient {
+  models: GenAIModelClient;
+}
 
 // Lazy initialize Gemini client to support ESM dynamic import
-let _aiClient: any = null;
-async function getAI() {
+let _aiClient: GenAIClient | null = null;
+async function getAI(): Promise<GenAIClient> {
   if (!_aiClient) {
     const { GoogleGenAI } = await import('@google/genai');
     _aiClient = new GoogleGenAI(

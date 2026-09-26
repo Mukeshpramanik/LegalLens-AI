@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
 import { Logger } from './logging';
 import { env } from '../config/env';
 
@@ -23,9 +24,26 @@ export function globalErrorHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ): void {
-  const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const errorCode = err instanceof AppError ? err.errorCode : 'INTERNAL_SERVER_ERROR';
-  const message = err.message || 'An unexpected server error occurred.';
+  let statusCode = 500;
+  let errorCode = 'INTERNAL_SERVER_ERROR';
+  let message = err.message || 'An unexpected server error occurred.';
+
+  if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    errorCode = err.errorCode;
+  } else if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      statusCode = 413;
+      errorCode = 'FILE_TOO_LARGE';
+      message = 'File size exceeds maximum allowed limit (10MB).';
+    } else {
+      statusCode = 400;
+      errorCode = err.code || 'UPLOAD_ERROR';
+    }
+  } else if (message.includes('not allowed by CORS')) {
+    statusCode = 403;
+    errorCode = 'CORS_FORBIDDEN';
+  }
 
   Logger.error(`API Error: ${message}`, {
     requestId: req.headers['x-request-id'] as string,

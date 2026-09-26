@@ -14,16 +14,31 @@
     "build:backend": "npm --prefix backend run build",
     "build:frontend": "npm --prefix frontend run build",
     "build": "npm run build:backend && npm run build:frontend",
+    "start": "npm --prefix backend start",
+    "start:backend": "npm --prefix backend start",
     "typecheck:backend": "npm --prefix backend run typecheck",
     "typecheck:frontend": "npm --prefix frontend run typecheck",
     "typecheck": "npm run typecheck:backend && npm run typecheck:frontend",
+    "test": "node scripts/test-backend-production.js",
+    "test:backend": "node scripts/test-backend-production.js",
     "firebase": "firebase",
     "verify": "node scripts/verify.js && npm run typecheck && npm run build",
     "diagnose:gemini": "node scripts/diagnose-gemini.js",
-    "scan-secrets": "node -e \"const fs=require('fs'); const content=fs.readFileSync('.gitignore','utf8'); if(!content.includes('.env')) { console.error('SECURITY FAILURE: .env missing from .gitignore!'); process.exit(1); } console.log('✅ Secret baseline scan passed: .env correctly ignored.');\""
+    "scan-secrets": "node -e \"const fs=require('fs'); const content=fs.readFileSync('.gitignore','utf8'); if(!content.includes('.env')) { console.error('SECURITY FAILURE: .env missing from .gitignore!'); process.exit(1); } console.log('✅ Secret baseline scan passed: .env correctly ignored.');\"",
+    "secret-scan": "npm run scan-secrets"
+  },
+  "engines": {
+    "node": "20.18.0"
+  },
+  "dependencies": {
+    "typescript": "5.6.2"
   },
   "devDependencies": {
     "firebase-tools": "^13.35.1",
-    "typescript": "5.6.2"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.16.5",
+    "@types/uuid": "^10.0.0"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "name": "legalease-ai-shared",
+  "version": "1.0.0",
+  "description": "Shared types and constants for LegalLens AI",
+  "private": true,
+  "main": "types/index.ts"
+}

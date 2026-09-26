@@ -1,20 +1,29 @@
 import dotenv from 'dotenv';
-import fs from "fs";
-
+import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 
-let envPath = path.resolve(__dirname, '../../../.env'); // ts-node (src/config)
-if (!fs.existsSync(envPath)) {
-  envPath = path.resolve(__dirname, '../../../../../.env'); // node (dist/backend/src/config)
+// Resolve .env from multiple potential working/transpiled directories
+const possibleEnvPaths = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), 'backend/.env'),
+  path.resolve(__dirname, '../../../.env'),
+  path.resolve(__dirname, '../../../../../.env'),
+  path.resolve(__dirname, '../../.env'),
+];
+
+for (const p of possibleEnvPaths) {
+  if (fs.existsSync(p)) {
+    dotenv.config({ path: p });
+    break;
+  }
 }
-if (!fs.existsSync(envPath)) {
-  envPath = path.resolve(process.cwd(), '.env'); // fallback
-}
-dotenv.config({ path: envPath });
 
 const envSchema = z.object({
-  PORT: z.string().default('8080').transform((val) => parseInt(val, 10)),
+  PORT: z
+    .union([z.string(), z.number()])
+    .default('8080')
+    .transform((val) => (typeof val === 'number' ? val : parseInt(val, 10))),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
 
@@ -42,7 +51,23 @@ function parseEnv() {
     // In dev mode, fallback to default values
     return envSchema.parse({});
   }
-  return result.data;
+
+  const parsed = result.data;
+
+  // Production configuration warnings (clear, actionable, no secrets leaked)
+  if (parsed.NODE_ENV === 'production') {
+    if (parsed.AI_PROVIDER === 'google-gemini-api' && (!parsed.GEMINI_API_KEY || !parsed.GEMINI_API_KEY.trim())) {
+      console.warn('⚠️  [CONFIG WARNING] GEMINI_API_KEY is not configured in production. AI analysis and Q&A endpoints will fail.');
+    }
+    if (!parsed.FIREBASE_CLIENT_EMAIL || !parsed.FIREBASE_PRIVATE_KEY) {
+      console.warn('⚠️  [CONFIG WARNING] Firebase Admin credentials (FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY) are missing. Authenticated endpoints will return 503.');
+    }
+    if (parsed.FRONTEND_URL === 'http://localhost:3000') {
+      console.warn('⚠️  [CONFIG WARNING] FRONTEND_URL is set to localhost in production. Set FRONTEND_URL to your deployed Cloudflare frontend domain.');
+    }
+  }
+
+  return parsed;
 }
 
 export const env = parseEnv();

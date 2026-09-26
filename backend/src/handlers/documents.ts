@@ -17,8 +17,8 @@ export const uploadMiddleware = multer({
   limits: {
     fileSize: MAX_FILE_SIZE_BYTES, // 10 MB limit
   },
-  fileFilter: (_req, file, cb) => {
-    if (SUPPORTED_MIME_TYPES.includes(file.mimetype as any)) {
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    if ((SUPPORTED_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new AppError('Unsupported file format. Please upload PDF, DOCX, or TXT.', 400, 'INVALID_FILE_TYPE'));

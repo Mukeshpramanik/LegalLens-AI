@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "Backend API and AI orchestration service for LegalEase-AI",
   "main": "dist/backend/src/index.js",
+  "engines": {
+    "node": "20.18.0"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/backend/src/index.js",
     "typecheck": "tsc --noEmit",
+    "test": "node ../scripts/test-backend-production.js",
     "lint": "eslint src/ --ext .ts"
   },
   "dependencies": {
@@ -15,6 +19,12 @@
     "@google-cloud/storage": "^7.13.0",
     "@google-cloud/vertexai": "^1.9.0",
     "@google/genai": "^1.52.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.16.5",
+    "@types/pdf-parse": "^1.1.4",
+    "@types/uuid": "^10.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
@@ -24,17 +34,11 @@
     "mammoth": "^1.8.0",
     "multer": "^1.4.5-lts.1",
     "pdf-parse": "^1.1.1",
+    "typescript": "5.6.2",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/multer": "^1.4.12",
-    "@types/node": "^20.16.5",
-    "@types/pdf-parse": "^1.1.4",
-    "@types/uuid": "^10.0.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "5.6.2"
+    "ts-node-dev": "^2.0.0"
   }
 }

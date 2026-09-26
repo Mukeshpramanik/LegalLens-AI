@@ -21,5 +21,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../shared/**/*"],
+  "exclude": ["node_modules", "dist", "../frontend", "../node_modules"]
 }
