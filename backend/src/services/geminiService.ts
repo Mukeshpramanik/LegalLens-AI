@@ -1,27 +1,34 @@
-import { GoogleGenAI } from '@google/genai';
 import { v4 as uuidv4 } from 'uuid';
 import { env } from '../config/env';
 import { Logger } from '../utils/logging';
 import { AnalysisResult, QAPair, ComparisonResult } from '../../../shared/types';
 
-// Initialize Gemini using modern @google/genai SDK with provider abstraction
-const ai = new GoogleGenAI(
-  env.AI_PROVIDER === 'google-gemini-api'
-    ? {
-        apiKey: env.GEMINI_API_KEY?.trim(),
-      }
-    : {
-        vertexai: true,
-        project: env.GCP_PROJECT_ID,
-        location: env.VERTEX_AI_LOCATION,
-        googleAuthOptions: {
-          credentials: {
-            client_email: env.FIREBASE_CLIENT_EMAIL,
-            private_key: (env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-          },
-        },
-      }
-);
+
+// Lazy initialize Gemini client to support ESM dynamic import
+let _aiClient: any = null;
+async function getAI() {
+  if (!_aiClient) {
+    const { GoogleGenAI } = await import('@google/genai');
+    _aiClient = new GoogleGenAI(
+      env.AI_PROVIDER === 'google-gemini-api'
+        ? {
+            apiKey: env.GEMINI_API_KEY?.trim(),
+          }
+        : {
+            vertexai: true,
+            project: env.GCP_PROJECT_ID,
+            location: env.VERTEX_AI_LOCATION,
+            googleAuthOptions: {
+              credentials: {
+                client_email: env.FIREBASE_CLIENT_EMAIL,
+                private_key: (env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+              },
+            },
+          }
+    );
+  }
+  return _aiClient;
+}
 
 export class GeminiService {
   /**
@@ -92,7 +99,7 @@ ${documentText}
     try {
       while (attempt <= maxRetries) {
         try {
-          response = await ai.models.generateContent({
+          response = await (await getAI()).models.generateContent({
             model: env.GEMINI_MODEL,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
@@ -258,7 +265,7 @@ ${documentText}
     try {
       while (attempt <= maxRetries) {
         try {
-          response = await ai.models.generateContent({
+          response = await (await getAI()).models.generateContent({
             model: env.GEMINI_MODEL,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
@@ -414,7 +421,7 @@ ${doc2Text}
     try {
       while (attempt <= maxRetries) {
         try {
-          response = await ai.models.generateContent({
+          response = await (await getAI()).models.generateContent({
             model: env.GEMINI_MODEL,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
