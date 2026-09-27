@@ -6,6 +6,10 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 'standalone' is required for Cloudflare Workers / opennextjs builds.
+  // On Vercel, frontend/vercel.json overrides the build command to 'next build'
+  // which skips the opennextjs step, so output mode doesn't matter for Vercel.
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
