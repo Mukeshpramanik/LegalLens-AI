@@ -17,9 +17,9 @@ services:
       - key: AI_PROVIDER
         value: google-gemini-api
       - key: GEMINI_MODEL
-        value: gemini-3.6-flash
+        value: gemini-2.5-flash-lite-preview-06-17
       - key: FRONTEND_URL
-        sync: false
+        value: https://legallens-p9ry0d8dv-mukeshsharma09504-3768.vercel.app
       - key: GEMINI_API_KEY
         sync: false
       - key: FIREBASE_PROJECT_ID

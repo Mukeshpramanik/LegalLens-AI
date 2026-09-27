@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { apiClient } from '../../../../services/api';
+import { apiClient, isQuotaExceededError } from '../../../../services/api';
 import { AnalysisResult, LegalDocument, QAPair } from '../../../../shared/types';
 import {
   ArrowLeft, Loader2, AlertCircle, FileText, CheckCircle,
@@ -163,9 +163,15 @@ export default function DocumentAnalysisPage() {
               <AlertCircle className="w-6 h-6 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-lg mb-1">
-                  {analysisError.includes('quota') || analysisError.includes('rate limit') || analysisError.includes('429') ? 'API Quota Exceeded' : 'Analysis Failed'}
+                  {isQuotaExceededError(new Error(analysisError)) ? '⚠️ API Quota Exceeded' : 'Analysis Failed'}
                 </h3>
                 <p className="text-sm">{analysisError}</p>
+                {isQuotaExceededError(new Error(analysisError)) && (
+                  <p className="text-xs mt-2 text-red-500">
+                    Your Gemini API quota has been exhausted. Please wait a few minutes before retrying, or check your quota at{' '}
+                    <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline font-medium">aistudio.google.com</a>.
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -192,7 +198,7 @@ export default function DocumentAnalysisPage() {
           <div>
             <h3 className="text-xl font-bold text-slate-900">AI is reviewing your document</h3>
             <p className="text-slate-500 text-sm max-w-sm mt-2 mx-auto leading-relaxed">
-              Gemini 3.6 Flash is currently extracting clauses, identifying risks, and mapping obligations...
+              Gemini 2.5 Flash-Lite is currently extracting clauses, identifying risks, and mapping obligations...
             </p>
           </div>
         </div>
@@ -322,9 +328,15 @@ export default function DocumentAnalysisPage() {
                   <AlertCircle className="w-5 h-5 flex-shrink-0" />
                   <div>
                     <strong className="block mb-0.5">
-                      {qaError.includes('quota') || qaError.includes('rate limit') || qaError.includes('429') ? 'API Quota Exceeded' : 'Question Failed'}
+                      {isQuotaExceededError(new Error(qaError)) ? '⚠️ API Quota Exceeded' : 'Question Failed'}
                     </strong>
                     {qaError}
+                    {isQuotaExceededError(new Error(qaError)) && (
+                      <p className="text-xs mt-1 text-red-500">
+                        Please wait a few minutes before trying again. Check your quota at{' '}
+                        <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline">aistudio.google.com</a>.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

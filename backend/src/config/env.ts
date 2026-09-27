@@ -34,7 +34,7 @@ const envSchema = z.object({
   AI_PROVIDER: z.enum(['google-gemini-api', 'vertex-ai']).default('google-gemini-api'),
   GEMINI_API_KEY: z.string().optional(),
   VERTEX_AI_LOCATION: z.string().default('us-central1'),
-  GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash-lite-preview-06-17'),
 
   FIREBASE_PROJECT_ID: z.string().default('demo-firebase-project'),
   FIREBASE_CLIENT_EMAIL: z.string().optional(),
@@ -63,7 +63,7 @@ function parseEnv() {
       console.warn('⚠️  [CONFIG WARNING] Firebase Admin credentials (FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY) are missing. Authenticated endpoints will return 503.');
     }
     if (parsed.FRONTEND_URL === 'http://localhost:3000') {
-      console.warn('⚠️  [CONFIG WARNING] FRONTEND_URL is set to localhost in production. Set FRONTEND_URL to your deployed Cloudflare frontend domain.');
+      console.warn('⚠️  [CONFIG WARNING] FRONTEND_URL is set to localhost in production. Set FRONTEND_URL to your deployed Vercel frontend URL (e.g. https://legallens-p9ry0d8dv-mukeshsharma09504-3768.vercel.app).');
     }
   }
 

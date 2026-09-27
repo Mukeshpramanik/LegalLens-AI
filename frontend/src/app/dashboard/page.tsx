@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { checkBackendHealth, apiClient } from '../../services/api';
+import { checkBackendHealth, apiClient, isQuotaExceededError } from '../../services/api';
 import DocumentUpload from '../../components/Documents/DocumentUpload';
 import { LegalDocument, ComparisonResult } from '../../shared/types';
 import { FileText, Clock, CheckCircle, ShieldAlert, Loader2, ArrowRight, Scale, Trash2, AlertCircle } from 'lucide-react';
@@ -155,9 +155,15 @@ export default function DashboardPage() {
               <ShieldAlert className="w-5 h-5 flex-shrink-0" />
               <div>
                 <strong className="block mb-0.5">
-                  {compareError.includes('quota') || compareError.includes('rate limit') ? 'API Quota Exceeded' : 'Comparison Failed'}
+                  {isQuotaExceededError(new Error(compareError)) ? '⚠️ API Quota Exceeded' : 'Comparison Failed'}
                 </strong>
                 {compareError}
+                {isQuotaExceededError(new Error(compareError)) && (
+                  <p className="text-xs mt-1 text-red-500">
+                    Please wait a few minutes before retrying. Check your quota at{' '}
+                    <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline">aistudio.google.com</a>.
+                  </p>
+                )}
               </div>
             </div>
           )}

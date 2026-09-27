@@ -7,5 +7,28 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  // ---------------------------------------------------------------------------
+  // IMPORTANT: Cloudflare Workers environment variables.
+  //
+  // NEXT_PUBLIC_* values are baked into the JS bundle at BUILD time by Next.js.
+  // They do NOT need to be set here as runtime Cloudflare env vars.
+  //
+  // However, you MUST ensure these are set in your CI/CD environment BEFORE
+  // running `npm run build` so that Next.js can inline them:
+  //
+  //   NEXT_PUBLIC_FIREBASE_API_KEY
+  //   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN      (e.g. legallens-ai-6ac50.firebaseapp.com)
+  //   NEXT_PUBLIC_FIREBASE_PROJECT_ID       (e.g. legallens-ai-6ac50)
+  //   NEXT_PUBLIC_API_URL                   (e.g. https://legallens-ai-backend-aglb.onrender.com)
+  //
+  // These can be set via Cloudflare Pages dashboard environment variables
+  // (Settings → Environment Variables) so that Cloudflare rebuilds pick them up.
+  //
+  // Google Sign-In DOMAIN AUTHORIZATION:
+  // You must add your workers.dev domain to Firebase Console:
+  //   Firebase Console → Authentication → Settings → Authorized Domains
+  //   Add: legallens-ai.workers.dev (or your custom domain)
+  // ---------------------------------------------------------------------------
+  "vars": {}
 }
